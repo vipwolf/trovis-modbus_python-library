@@ -52,6 +52,7 @@ from .subsystems import (
     Controller,
     DomesticHotWater,
     HeatingCircuit,
+    HeatMeter,
     Sensors,
     SolarCircuit,
 )
@@ -132,6 +133,9 @@ class Trovis557x:
         self.rk4 = DomesticHotWater(unit)
         self.buffer_tank = BufferTankCircuit(unit)
         self.solar = SolarCircuit(unit)
+        self.wmz1 = HeatMeter(unit, index=1)
+        self.wmz2 = HeatMeter(unit, index=2)
+        self.wmz3 = HeatMeter(unit, index=3)
         self._writing_enabled = False
 
         all_components = (
@@ -147,6 +151,9 @@ class Trovis557x:
             self.rk4,
             self.buffer_tank,
             self.solar,
+            self.wmz1,
+            self.wmz2,
+            self.wmz3,
         )
         register_ranges, coil_ranges = ranges_for_model(model)
         register_ranges = ranges_excluding_addresses(
@@ -215,6 +222,11 @@ class Trovis557x:
     def control_circuits(self) -> tuple[HeatingCircuit, ...]:
         """Return the built-in Rk1-Rk3 control circuits for this model."""
         return self._control_circuits
+
+    @property
+    def heat_meters(self) -> tuple[HeatMeter, ...]:
+        """Return the three indexed M-Bus meter slots."""
+        return (self.wmz1, self.wmz2, self.wmz3)
 
     @property
     def configuration_definition(self) -> ConfigurationDefinition | None:
@@ -591,6 +603,7 @@ class Trovis557x:
             self.rk4,
             self.buffer_tank,
             self.solar,
+            *self.heat_meters,
         )
 
     @property

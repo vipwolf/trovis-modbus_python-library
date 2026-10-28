@@ -79,6 +79,46 @@ Depending on the controller model and its configuration, `trovis-modbus` provide
 
 The exact datapoints exposed for a controller therefore reflect the capabilities and configuration of the actual installation rather than a static model-wide register list.
 
+## Heat meters
+
+The read-only `HeatMeter` component covers HR46500 through HR46522 for meter 1.
+Indices 2 and 3 add 500 and 1000 to those references. Normal device updates
+include all three model-readable slots:
+
+```python
+from trovis_modbus import HeatMeter, Trovis557x
+
+device = Trovis557x(unit)
+await device.async_update()
+flow_rate = device.wmz1.flow_rate  # m³/h
+energy = device.wmz1.energy  # kWh
+source_energy_unit = device.wmz1.energy_unit
+meters = device.heat_meters  # (wmz1, wmz2, wmz3)
+
+meter = HeatMeter(unit, index=2)
+await meter.async_update()
+volume = meter.volume  # m³
+power = meter.power  # kW
+```
+
+Each measurement reads its three numeric parts and source unit together in one
+holding-register request. Values normalize to m³/h, m³, kW and kWh; the
+`flow_rate_unit`, `volume_unit`, `power_unit` and `energy_unit` enums describe
+the original device units. A single request prevents assembly from separate
+reads, but does not guarantee a hardware-latched snapshot.
+
+The component also provides numeric `status`, `error_status`, `manufacturer_id`,
+combined `operating_time`, `volume_read_date` (`MonthDay`, without a year) and
+`volume_read_time` (`datetime.time`). The register table does not specify the
+operating-time unit, so none is assumed. Status bits are not interpreted.
+
+Values are `None` before updating or when their fields are excluded or unavailable.
+Invalid composite parts, unknown measurement unit selectors and invalid dates or
+times also decode to `None`. Excluding any measurement word, including its unit,
+disables the entire composite field. Readable slots are polled regardless of
+whether a physical meter is connected; slot readability is not presence detection.
+M-Bus configuration, read triggers and registers after HR46522 are not yet modeled.
+
 ## 👉 Testing and validation
 
 All releases of the library are tested with the following hardware setup:

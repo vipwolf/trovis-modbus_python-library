@@ -62,6 +62,7 @@ from .subsystems import (
     Controller,
     DomesticHotWater,
     HeatingCircuit,
+    HeatMeter,
     Sensors,
     SolarCircuit,
 )
@@ -88,6 +89,7 @@ __all__ = [
     "Functions",
     "HeatingCircuit",
     "HeatingCircuitControlMode",
+    "HeatMeter",
     "HeatMeterReadMode",
     "DomesticHotWater",
     "MonthDay",

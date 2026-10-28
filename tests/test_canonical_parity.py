@@ -56,6 +56,13 @@ KNOWN_NON_CANONICAL_REGISTERS = {
     register_address(42003),  # Charging-pump sensor selection (SLP_Sensor)
 }
 
+# Heat meter registers that are not part of the older canonical reference file.
+KNOWN_NON_CANONICAL_REGISTERS.update(
+    register_address(46500 + meter_offset + field_offset)
+    for meter_offset in (0, 500, 1000)
+    for field_offset in (0, 1, 2, 3, 4, 6, 9, 10, 13, 14, 17, 18, 21, 22)
+)
+
 # Manufacturer-documented points absent from the older canonical list.
 # Values state the expected writable flag.
 KNOWN_NON_CANONICAL_COILS = {
